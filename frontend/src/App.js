@@ -1,63 +1,50 @@
-import { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Header from './components/Header';
-import Search from './components/Search';
-
+import { useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Header from "./components/Header";
+import Search from "./components/Search";
+import ImageCard from "./components/ImagesCard";
+import { Container, Row, Col } from "react-bootstrap";
 
 const UNSPLASH_KEY = process.env.REACT_APP_UNSPLASH_KEY;
 
-
-
 const App = () => {
-  const [word, setWord] = useState('')
+  const [word, setWord] = useState("");
+  const [images, setImages] = useState([]);
+
+  const handleDeletSubmit = (id) => {
+    setImages(images.filter((image) => image.id !== id));
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    console.log(word);
-    fetch(`https://api.unsplash.com/photos/random/?query=${word}&client_id=${UNSPLASH_KEY}`)
+    fetch(
+      `https://api.unsplash.com/photos/random/?query=${word}&client_id=${UNSPLASH_KEY}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        console.log(data)
+        setImages([{ ...data, title: word }, ...images]);
       })
       .catch((err) => {
-        console.log(err)
-      })
-  }
+        console.log(err);
+      });
+    setWord("");
+  };
 
-  // console.log(process.env.REACT_APP_UNSPLASH_KEY)
-
- 
   return (
     <div>
-      <Header title = "Images Gallery" />
-      <Search word={word} setWord={setWord} handleSearch ={handleSearchSubmit}/>
+      <Header title="Images Gallery" />
+      <Search word={word} setWord={setWord} handleSearch={handleSearchSubmit} />
+      <Container className="mt-4">
+        <Row xs={1} md={2} lg={3}>
+          {images.map((image, i) => (
+            <Col key={i} className="pb-3">
+              <ImageCard image={image} deleteImage={handleDeletSubmit} />
+            </Col>
+          ))}
+        </Row>
+      </Container>
     </div>
   );
-}
+};
 
 export default App;
-
-export const userPostFetch = user => {
-  return dispatch => {
-    return fetch("http://localhost:3000/api/v1/users", {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({user})
-    })
-      .then(resp => resp.json())
-      .then(data => {
-        if (data.message) {
-        } else {
-          localStorage.setItem("token", data.jwt)
-          dispatch(loginUser(data.user))
-        }
-      })
-  }
-}
-
-const loginUser = userObj => ({
-    type: 'LOGIN_USER',
-    payload: userObj
-})
