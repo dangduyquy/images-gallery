@@ -1,8 +1,12 @@
+import os
 from flask import Flask, request
 import requests
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="./.env.local")
 
 UNSPLASH_URL="https://api.unsplash.com/photos/random"
-UNSPLASH_KEY="Ivrf0KPCVE-m1Wd2L2pHwY6e2Qj-I8Ww_7oyJ7Veg7Y"
+UNSPLASH_KEY=os.environ.get("UNSPLASH_KEY", "")
 
 app = Flask(__name__)
 
@@ -13,9 +17,7 @@ def new_image():
         "Accept-Version": "v1",
         "Authorization": "Client-ID " + UNSPLASH_KEY
     }
-    params = {
-        "query": word
-    }
+    params = {"query": word}
     response = requests.get(url=UNSPLASH_URL, headers=headers, params=params)
     data = response.json()
     return data    
